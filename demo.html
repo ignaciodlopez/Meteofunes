@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="MeteoFunes - Información meteorológica de Funes, Santa Fe, Argentina">
+    <title>MeteoFunes - El Clima de Funes</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    
+    <style>
+        /* Custom Variables */
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --card-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            --card-hover-shadow: 0 15px 50px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Global Styles */
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(to bottom, #f8f9fa 0%, #e9ecef 100%);
+            min-height: 100vh;
+        }
+
+        /* Animated Background */
+        .animated-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #667eea 100%);
+            background-size: 200% 200%;
+            animation: gradientShift 15s ease infinite;
+            opacity: 0.05;
+            z-index: 0;
+        }
+
+        @keyframes gradientShift {
+            0%, 100% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+        }
+
+        /* Navbar Styles */
+        .bg-gradient-primary {
+            background: var(--primary-gradient);
+        }
+
+        .navbar {
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .navbar-brand {
+            font-size: 1.5rem;
+            transition: transform 0.3s ease;
+        }
+
+        .navbar-brand:hover {
+            transform: scale(1.05);
+        }
+
+        .nav-link {
+            font-weight: 500;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: 0;
+            left: 50%;
+            background-color: white;
+            transition: all 0.3s ease;
+            transform: translateX(-50%);
+        }
+
+        .nav-link:hover::after {
+            width: 80%;
+        }
+
+        /* Hero Section */
+        .hero-section {
+            position: relative;
+            min-height: 60vh;
+            display: flex;
+            align-items: center;
+            padding: 3rem 0;
+        }
+
+        /* Weather Card */
+        .weather-card {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.9) 100%);
+            backdrop-filter: blur(10px);
+            border-radius: 30px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            position: relative;
+            z-index: 1;
+        }
+
+        .weather-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--card-hover-shadow);
+        }
+
+        .weather-icon-large {
+            font-size: 8rem;
+            color: #667eea;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        #temperature {
+            font-size: 5rem;
+            color: #667eea;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .weather-detail-card {
+            background: rgba(102, 126, 234, 0.05);
+            padding: 1rem;
+            border-radius: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .weather-detail-card:hover {
+            background: rgba(102, 126, 234, 0.1);
+            transform: scale(1.05);
+        }
+
+        .text-orange {
+            color: #ff6b6b;
+        }
+
+        /* Forecast Cards */
+        .forecast-card {
+            background: white;
+            border-radius: 20px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+            border: none;
+            box-shadow: var(--card-shadow);
+            height: 100%;
+        }
+
+        .forecast-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--card-hover-shadow);
+        }
+
+        .forecast-icon {
+            font-size: 3rem;
+            margin: 1rem 0;
+        }
+
+        .temp-display {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .temp-range {
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+
+        /* Info Cards */
+        .info-card {
+            transition: all 0.3s ease;
+            border-radius: 20px;
+            overflow: hidden;
+        }
+
+        .info-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--card-hover-shadow);
+        }
+
+        .icon-circle {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .info-card:hover .icon-circle {
+            transform: rotate(360deg);
+        }
+
+        /* Smooth Scrolling */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+        }
+
+        /* Footer */
+        footer {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+        }
+
+        @media (max-width: 768px) {
+            #temperature {
+                font-size: 4rem;
+            }
+            
+            .weather-icon-large {
+                font-size: 5rem;
+            }
+            
+            .display-5 {
+                font-size: 2rem;
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .forecast-card {
+            animation: fadeIn 0.5s ease forwards;
+            opacity: 0;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-gradient-primary sticky-top shadow">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="#">
+                <i class="bi bi-cloud-sun-fill fs-3 me-2"></i>
+                <span class="fw-bold">MeteoFunes</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#">
+                            <i class="bi bi-house-fill me-1"></i>Inicio
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#forecast">
+                            <i class="bi bi-calendar3 me-1"></i>Pronóstico
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#about">
+                            <i class="bi bi-info-circle me-1"></i>Acerca de
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section with Current Weather -->
+    <section class="hero-section position-relative overflow-hidden">
+        <div class="animated-background"></div>
+        <div class="container py-5">
+            <div class="row justify-content-center">
+                <div class="col-lg-10">
+                    <!-- Current Weather Card -->
+                    <div class="card weather-card shadow-lg border-0 mb-4" id="currentWeatherCard">
+                        <div class="card-body p-4 p-md-5">
+                            <div class="row align-items-center">
+                                <div class="col-md-6 text-center text-md-start mb-4 mb-md-0">
+                                    <div class="d-flex align-items-center justify-content-center justify-content-md-start mb-3">
+                                        <i class="bi bi-geo-alt-fill text-primary me-2 fs-5"></i>
+                                        <h2 class="mb-0 fw-bold" id="location">Funes, Santa Fe</h2>
+                                    </div>
+                                    <div class="weather-icon-large mb-3" id="weatherIconLarge">
+                                        <i class="bi bi-cloud-sun-fill"></i>
+                                    </div>
+                                    <h1 class="display-1 fw-bold mb-0" id="temperature">
+                                        <span>24</span>°C
+                                    </h1>
+                                    <p class="text-muted fs-5 mb-0" id="condition">Parcialmente nublado</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="row g-3">
+                                        <div class="col-6">
+                                            <div class="weather-detail-card">
+                                                <div class="d-flex align-items-center mb-2">
+                                                    <i class="bi bi-thermometer-half text-danger me-2"></i>
+                                                    <span class="text-muted small">Sensación</span>
+                                                </div>
+                                                <h4 class="mb-0" id="feelsLike">22°C</h4>
+                                            </div>
+                                        </div>
+                                        <div class="col-6">
+                                            <div class="weather-detail-card">
+                                                <div class="d-flex align-items-center mb-2">
+                                                    <i class="bi bi-droplet-fill text-info me-2"></i>
+                                                    <span class="text-muted small">Humedad</span>
+                                                </div>
+                                                <h4 class="mb-0" id="humidity">65%</h4>
+                                            </div>
+                                        </div>
+                                        <div class="col-6">
+                                            <div class="weather-detail-card">
+                                                <div class="d-flex align-items-center mb-2">
+                                                    <i class="bi bi-wind text-primary me-2"></i>
+                                                    <span class="text-muted small">Viento</span>
+                                                </div>
+                                                <h4 class="mb-0" id="windSpeed">15 km/h</h4>
+                                            </div>
+                                        </div>
+                                        <div class="col-6">
+                                            <div class="weather-detail-card">
+                                                <div class="d-flex align-items-center mb-2">
+                                                    <i class="bi bi-speedometer2 text-success me-2"></i>
+                                                    <span class="text-muted small">Presión</span>
+                                                </div>
+                                                <h4 class="mb-0" id="pressure">1015 hPa</h4>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row mt-4 pt-3 border-top">
+                                <div class="col-4 text-center">
+                                    <i class="bi bi-sunrise-fill text-warning fs-4"></i>
+                                    <p class="mb-0 mt-2 text-muted small">Amanecer</p>
+                                    <p class="mb-0 fw-bold" id="sunrise">06:30</p>
+                                </div>
+                                <div class="col-4 text-center">
+                                    <i class="bi bi-sunset-fill text-orange fs-4"></i>
+                                    <p class="mb-0 mt-2 text-muted small">Atardecer</p>
+                                    <p class="mb-0 fw-bold" id="sunset">19:45</p>
+                                </div>
+                                <div class="col-4 text-center">
+                                    <i class="bi bi-brightness-high-fill text-warning fs-4"></i>
+                                    <p class="mb-0 mt-2 text-muted small">Índice UV</p>
+                                    <p class="mb-0 fw-bold" id="uvIndex">7</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Forecast Section -->
+    <section class="py-5 bg-light" id="forecast">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="display-5 fw-bold mb-3">
+                    <i class="bi bi-calendar-week text-primary me-2"></i>
+                    Pronóstico Semanal
+                </h2>
+                <p class="text-muted">Planifica tu semana con nuestro pronóstico detallado</p>
+            </div>
+            <div class="row g-4" id="forecastContainer">
+                <!-- Forecast cards -->
+                <div class="col-lg-3 col-md-4 col-sm-6" style="animation-delay: 0.1s">
+                    <div class="card forecast-card">
+                        <div class="card-body text-center">
+                            <h5 class="fw-bold mb-2">Lunes</h5>
+                            <p class="text-muted small mb-3">17/11</p>
+                            <div class="forecast-icon">
+                                <i class="bi bi-sun-fill" style="color: #ffd700"></i>
+                            </div>
+                            <div class="temp-display mb-2">28°</div>
+                            <div class="temp-range mb-3">Min: 16°</div>
+                            <div class="d-flex justify-content-around align-items-center mt-3 pt-3 border-top">
+                                <div>
+                                    <i class="bi bi-droplet-fill text-info"></i>
+                                    <small class="d-block">10%</small>
+                                </div>
+                                <div>
+                                    <i class="bi bi-moisture text-primary"></i>
+                                    <small class="d-block">45%</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-4 col-sm-6" style="animation-delay: 0.2s">
+                    <div class="card forecast-card">
+                        <div class="card-body text-center">
+                            <h5 class="fw-bold mb-2">Martes</h5>
+                            <p class="text-muted small mb-3">18/11</p>
+                            <div class="forecast-icon">
+                                <i class="bi bi-cloud-sun-fill" style="color: #60a5fa"></i>
+                            </div>
+                            <div class="temp-display mb-2">26°</div>
+                            <div class="temp-range mb-3">Min: 15°</div>
+                            <div class="d-flex justify-content-around align-items-center mt-3 pt-3 border-top">
+                                <div>
+                                    <i class="bi bi-droplet-fill text-info"></i>
+                                    <small class="d-block">20%</small>
+                                </div>
+                                <div>
+                                    <i class="bi bi-moisture text-primary"></i>
+                                    <small class="d-block">55%</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-4 col-sm-6" style="animation-delay: 0.3s">
+                    <div class="card forecast-card">
+                        <div class="card-body text-center">
+                            <h5 class="fw-bold mb-2">Miércoles</h5>
+                            <p class="text-muted small mb-3">19/11</p>
+                            <div class="forecast-icon">
+                                <i class="bi bi-cloud-rain-fill" style="color: #3b82f6"></i>
+                            </div>
+                            <div class="temp-display mb-2">22°</div>
+                            <div class="temp-range mb-3">Min: 14°</div>
+                            <div class="d-flex justify-content-around align-items-center mt-3 pt-3 border-top">
+                                <div>
+                                    <i class="bi bi-droplet-fill text-info"></i>
+                                    <small class="d-block">75%</small>
+                                </div>
+                                <div>
+                                    <i class="bi bi-moisture text-primary"></i>
+                                    <small class="d-block">80%</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-4 col-sm-6" style="animation-delay: 0.4s">
+                    <div class="card forecast-card">
+                        <div class="card-body text-center">
+                            <h5 class="fw-bold mb-2">Jueves</h5>
+                            <p class="text-muted small mb-3">20/11</p>
+                            <div class="forecast-icon">
+                                <i class="bi bi-cloud-fill" style="color: #9ca3af"></i>
+                            </div>
+                            <div class="temp-display mb-2">20°</div>
+                            <div class="temp-range mb-3">Min: 12°</div>
+                            <div class="d-flex justify-content-around align-items-center mt-3 pt-3 border-top">
+                                <div>
+                                    <i class="bi bi-droplet-fill text-info"></i>
+                                    <small class="d-block">30%</small>
+                                </div>
+                                <div>
+                                    <i class="bi bi-moisture text-primary"></i>
+                                    <small class="d-block">70%</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Additional Info Section -->
+    <section class="py-5" id="about">
+        <div class="container">
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="card info-card border-0 shadow-sm h-100">
+                        <div class="card-body text-center p-4">
+                            <div class="icon-circle bg-primary bg-opacity-10 mx-auto mb-3">
+                                <i class="bi bi-clock-history text-primary fs-2"></i>
+                            </div>
+                            <h5 class="fw-bold mb-3">Actualización en Tiempo Real</h5>
+                            <p class="text-muted mb-0">Información meteorológica actualizada cada hora para que estés siempre informado.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card info-card border-0 shadow-sm h-100">
+                        <div class="card-body text-center p-4">
+                            <div class="icon-circle bg-success bg-opacity-10 mx-auto mb-3">
+                                <i class="bi bi-graph-up-arrow text-success fs-2"></i>
+                            </div>
+                            <h5 class="fw-bold mb-3">Datos Precisos</h5>
+                            <p class="text-muted mb-0">Utilizamos las mejores fuentes de datos meteorológicos para Funes y alrededores.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card info-card border-0 shadow-sm h-100">
+                        <div class="card-body text-center p-4">
+                            <div class="icon-circle bg-info bg-opacity-10 mx-auto mb-3">
+                                <i class="bi bi-phone text-info fs-2"></i>
+                            </div>
+                            <h5 class="fw-bold mb-3">100% Responsive</h5>
+                            <p class="text-muted mb-0">Accede desde cualquier dispositivo: computadora, tablet o smartphone.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white py-4 mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6 mb-3 mb-md-0">
+                    <h5 class="fw-bold">
+                        <i class="bi bi-cloud-sun-fill me-2"></i>MeteoFunes
+                    </h5>
+                    <p class="mb-0 text-white-50">
+                        Tu fuente confiable de información meteorológica para Funes, Santa Fe.
+                    </p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <p class="mb-2">
+                        <i class="bi bi-geo-alt-fill me-2"></i>
+                        Funes, Santa Fe, Argentina
+                    </p>
+                    <p class="mb-0 text-white-50">
+                        © 2024 MeteoFunes. Todos los derechos reservados.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap Bundle JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Simulación de actualización de datos
+        console.log('MeteoFunes cargado correctamente');
+        
+        // Puedes agregar aquí la lógica para cargar datos desde una API
+        // Por ejemplo: fetch('/api/weather/current')
+    </script>
+</body>
+</html>
